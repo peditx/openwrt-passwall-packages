@@ -16,6 +16,7 @@ on:
     paths-ignore:
       - '**.md'
       - '.github/**'
+  workflow_dispatch:
 env:
   TZ: Asia/Shanghai
   packages: ${{ github.repository }}
