@@ -182,7 +182,7 @@ jobs:
 
     - name: Upload compiled files to FTP server
       run: |
-        lftp -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} -e "mirror -R ./path/to/compiled/files /path/on/ftp/server; quit" ftp://ftp.yourserver.com
+        lftp -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} -e "mirror -R ./path/to/compiled/files /path/on/ftp/server; quit" ftp://ftpupload.net
         done
 
         
