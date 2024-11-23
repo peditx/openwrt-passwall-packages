@@ -178,25 +178,29 @@ jobs:
             exit 1
           fi
 
-        - name: Upload Compiled Packages to peditx/peditx-repo
-          run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
+    - name: Upload Compiled Packages to passrepo
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
         
-          # کلون کردن ریپازیتوری مقصد
-          git clone https://github.com/peditx/passrepo.git output_repo
-          cd output_repo
+        # کلون کردن ریپازیتوری مقصد
+        git clone https://github.com/peditx/passrepo.git output_repo
+        cd output_repo
         
-          # پاک کردن محتویات قبلی و کپی کردن فایل‌های جدید
-          rm -rf *
-          cp -r ../sdk/bin/packages ./
+        # پاک کردن محتویات قبلی و کپی کردن فایل‌های جدید
+        rm -rf *
+        cp -r ../sdk/bin/packages ./
         
-          # آپلود فایل‌ها
-          git add .
-          git commit -m "Auto-upload compiled packages for ${{ matrix.platform }}"
-          git push
+        # تایید محتوای کپی شده
+        ls -R . || echo "No files copied to output_repo"
+        
+        # آپلود فایل‌ها
+        git add .
+        git commit -m "Auto-upload compiled packages for ${{ matrix.platform }}"
+        git push
       env:
-        THUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
          done
 
