@@ -176,6 +176,13 @@ jobs:
             echo "Directory $DIR does not exist"
             exit 1
           fi
+
+    - name: Install lftp
+      run: sudo apt-get install -y lftp
+
+    - name: Upload compiled files to FTP server
+      run: |
+        lftp -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} -e "mirror -R ./path/to/compiled/files /path/on/ftp/server; quit" ftp://ftp.yourserver.com
         done
 
         
