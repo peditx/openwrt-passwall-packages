@@ -177,32 +177,6 @@ jobs:
             echo "Directory $DIR does not exist"
             exit 1
           fi
-
-    - name: Install lftp
-      run: sudo apt-get install -y lftp
-
-    - name: Upload compiled files to FTP server
-      run: |
-        lftp -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} -e "
-         mirror -R ./bin/packages/x86_64 /openwrt-passwall-packages/x86_64/; 
-         mirror -R ./bin/packages/aarch64_generic /openwrt-passwall-packages/aarch64_generic/; 
-         mirror -R ./bin/packages/aarch64_cortex-a53 /openwrt-passwall-packages/aarch64_cortex-a53/; 
-         mirror -R ./bin/packages/aarch64_cortex-a72 /openwrt-passwall-packages/aarch64_cortex-a72/; 
-         mirror -R ./bin/packages/arm_cortex-a7 /openwrt-passwall-packages/arm_cortex-a7/; 
-         mirror -R ./bin/packages/arm_cortex-a7_neon-vfpv4 /openwrt-passwall-packages/arm_cortex-a7_neon-vfpv4/; 
-         mirror -R ./bin/packages/arm_cortex-a8_vfpv3 /openwrt-passwall-packages/arm_cortex-a8_vfpv3/; 
-         mirror -R ./bin/packages/arm_cortex-a9 /openwrt-passwall-packages/arm_cortex-a9/; 
-         mirror -R ./bin/packages/arm_cortex-a9_neon /openwrt-passwall-packages/arm_cortex-a9_neon/; 
-         mirror -R ./bin/packages/arm_cortex-a9_vfpv3-d16 /openwrt-passwall-packages/arm_cortex-a9_vfpv3-d16/; 
-         mirror -R ./bin/packages/arm_cortex-a15_neon-vfpv4 /openwrt-passwall-packages/arm_cortex-a15_neon-vfpv4/; 
-         mirror -R ./bin/packages/mips_24kc /openwrt-passwall-packages/mips_24kc/; 
-         mirror -R ./bin/packages/mips_4kec /openwrt-passwall-packages/mips_4kec/; 
-         mirror -R ./bin/packages/mips_mips32 /openwrt-passwall-packages/mips_mips32/; 
-         mirror -R ./bin/packages/mipsel_24kc /openwrt-passwall-packages/mipsel_24kc/; 
-         mirror -R ./bin/packages/mipsel_74kc /openwrt-passwall-packages/mipsel_74kc/; 
-         mirror -R ./bin/packages/mipsel_mips32 /openwrt-passwall-packages/mipsel_mips32/; 
-         quit" ftp://ftpupload.net
-
         done
 
         
