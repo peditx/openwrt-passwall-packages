@@ -178,25 +178,35 @@ jobs:
             exit 1
           fi
 
+    - name: Debug SDK Directory
+      run: |
+        echo "Checking SDK structure..."
+        ls -R sdk || echo "SDK directory is empty"
+        ls -R sdk/bin || echo "Bin directory is empty"
+        ls -R sdk/bin/packages || echo "Packages directory is empty"
+        
     - name: Upload Compiled Packages to passrepo
       run: |
         git config --global user.name "GitHub Actions"
         git config --global user.email "actions@github.com"
         
-        # کلون کردن ریپازیتوری مقصد
         git clone https://github.com/peditx/passrepo.git output_repo
         cd output_repo
         
-        # پاک کردن محتویات قبلی و کپی کردن فایل‌های جدید
         rm -rf *
-        cp -r ../sdk/bin/packages ./
         
-        # تایید محتوای کپی شده
+        # کپی کردن فایل‌های تولید شده
+        if [ -d ../sdk/bin/packages ]; then
+          cp -r ../sdk/bin/packages/* ./
+        else
+          echo "Compiled files not found in expected path"
+          exit 1
+        fi
+        
         ls -R . || echo "No files copied to output_repo"
         
-        # آپلود فایل‌ها
         git add .
-        git commit -m "Auto-upload compiled packages for ${{ matrix.platform }}"
+        git commit -m "Auto-upload compiled packages"
         git push
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
