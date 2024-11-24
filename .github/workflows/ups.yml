@@ -1,4 +1,4 @@
-name: server
+name: 2server
 
 on:
   push:
