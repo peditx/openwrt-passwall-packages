@@ -183,4 +183,4 @@ jobs:
           -mkdir /var/www/${{ matrix.platform }}
           -put -r bin/targets/ /var/www/${{ matrix.platform }}
           bye
-EOF
+        EOF
