@@ -178,13 +178,15 @@ jobs:
             exit 1
           fi
 
-    - name: Debug SDK Directory
+    - name: Debug SDK Structure
       run: |
+        echo "Checking root structure..."
+        ls -R
         echo "Checking SDK structure..."
         ls -R sdk || echo "SDK directory is empty"
         ls -R sdk/bin || echo "Bin directory is empty"
         ls -R sdk/bin/packages || echo "Packages directory is empty"
-        
+
     - name: Upload Compiled Packages to passrepo
       run: |
         git config --global user.name "GitHub Actions"
@@ -198,8 +200,10 @@ jobs:
         # کپی کردن فایل‌های تولید شده
         if [ -d ../sdk/bin/packages ]; then
           cp -r ../sdk/bin/packages/* ./
+        elif [ -d sdk/bin/packages ]; then
+          cp -r sdk/bin/packages/* ./
         else
-          echo "Compiled files not found in expected path"
+          echo "Compiled files not found in any expected path"
           exit 1
         fi
         
@@ -210,7 +214,6 @@ jobs:
         git push
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
 
          done
 
