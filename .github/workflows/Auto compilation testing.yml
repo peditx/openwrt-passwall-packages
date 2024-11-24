@@ -178,42 +178,50 @@ jobs:
             exit 1
           fi
 
-    - name: Debug SDK Structure
-      run: |
-        echo "Checking root structure..."
-        ls -R
-        echo "Checking SDK structure..."
-        ls -R sdk || echo "SDK directory is empty"
-        ls -R sdk/bin || echo "Bin directory is empty"
-        ls -R sdk/bin/packages || echo "Packages directory is empty"
+- name: Debug SDK Structure
+  run: |
+    echo "Searching for .ipk and package files in the SDK directory..."
+    find sdk -name "*.ipk" || echo "No .ipk files found"
+    find sdk -name "package" || echo "No package files found"
 
-    - name: Upload Compiled Packages to passrepo
-      run: |
-        git config --global user.name "GitHub Actions"
-        git config --global user.email "actions@github.com"
-        
-        git clone https://github.com/peditx/passrepo.git output_repo
-        cd output_repo
-        
-        rm -rf *
-        
-        # کپی کردن فایل‌های تولید شده
-        if [ -d ../sdk/bin/packages ]; then
-          cp -r ../sdk/bin/packages/* ./
-        elif [ -d sdk/bin/packages ]; then
-          cp -r sdk/bin/packages/* ./
-        else
-          echo "Compiled files not found in any expected path"
-          exit 1
-        fi
-        
-        ls -R . || echo "No files copied to output_repo"
-        
-        git add .
-        git commit -m "Auto-upload compiled packages"
-        git push
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+- name: Build SDK
+  run: |
+    make defconfig
+    make -j$(nproc)
+    echo "Build completed"
+
+- name: Upload Compiled Packages to passrepo
+  run: |
+    git config --global user.name "GitHub Actions"
+    git config --global user.email "actions@github.com"
+    
+    git clone https://github.com/peditx/passrepo.git output_repo
+    cd output_repo
+    
+    rm -rf *
+    
+    echo "Searching and copying .ipk and package files to the correct directories..."
+    
+    # جستجوی تمامی فایل‌های .ipk و package و کپی به دایرکتوری‌های مشابه در output_repo
+    find ../sdk -name "*.ipk" | while read ipk_file; do
+      dir=$(dirname "$ipk_file" | sed 's|^../sdk/||')
+      mkdir -p "./$dir"
+      cp "$ipk_file" "./$dir/"
+    done
+
+    find ../sdk -name "package" | while read package_file; do
+      dir=$(dirname "$package_file" | sed 's|^../sdk/||')
+      mkdir -p "./$dir"
+      cp "$package_file" "./$dir/"
+    done
+    
+    ls -R . || echo "No files copied to output_repo"
+    
+    git add .
+    git commit -m "Auto-upload compiled packages"
+    git push
+  env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
          done
 
