@@ -179,4 +179,4 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y lftp
         cd sdk
-        lftp -e "mirror -R bin/targets/ /var/www/${{ matrix.platform }}; exit" -u ${{ secrets.SFTP_USER }},${{ secrets.SFTP_PASSWORD }} sftp://<your-sftp-server-address>
+        sftp -e "mirror -R bin/targets/ /var/www/${{ matrix.platform }}; exit" -u ${{ secrets.SFTP_USER }},${{ secrets.SFTP_PASSWORD }} sftp://static.115.193.75.5.clients.your-server.de
