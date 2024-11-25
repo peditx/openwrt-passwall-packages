@@ -1,4 +1,4 @@
-name: push
+name: Push
 
 on:
   push:
@@ -188,9 +188,9 @@ jobs:
         sudo apt-get install -y sshpass
         cd sdk
         sshpass -p "${{ secrets.SFTP_PASSWORD }}" ssh ${{ secrets.SFTP_USER }}@static.115.193.75.5.clients.your-server.de "mkdir -p /var/www/${{ matrix.platform }}"
-        find bin/targets -name "*.ipk" -or -name "Packages.gz" | while read -r file; do
-          sshpass -p "${{ secrets.SFTP_PASSWORD }}" sftp -o StrictHostKeyChecking=no ${{ secrets.SFTP_USER }}@your-sftp-server-address <<EOF
+        find bin/targets -type f \( -name "*.ipk" -o -name "Packages" -o -name "Packages.gz" -o -name "Packages.sig" -o -name "Packages.manifest" \) | while read -r file; do
+          sshpass -p "${{ secrets.SFTP_PASSWORD }}" sftp -o StrictHostKeyChecking=no ${{ secrets.SFTP_USER }}@static.115.193.75.5.clients.your-server.de <<EOF
             put $file /var/www/${{ matrix.platform }}/
             bye
-        EOF
+          EOF
         done
