@@ -189,6 +189,7 @@ jobs:
         cd sdk
         sshpass -p "${{ secrets.SFTP_PASSWORD }}" ssh ${{ secrets.SFTP_USER }}@static.115.193.75.5.clients.your-server.de "mkdir -p /var/www/${{ matrix.platform }}"
         find bin/targets -type f \( -name "*.ipk" -o -name "Packages" -o -name "Packages.gz" -o -name "Packages.sig" -o -name "Packages.manifest" \) | while read -r file; do
+          echo "Uploading $file"
           sshpass -p "${{ secrets.SFTP_PASSWORD }}" sftp -o StrictHostKeyChecking=no ${{ secrets.SFTP_USER }}@static.115.193.75.5.clients.your-server.de <<EOF
             put $file /var/www/${{ matrix.platform }}/
             bye
