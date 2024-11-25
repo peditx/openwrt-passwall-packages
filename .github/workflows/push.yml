@@ -187,9 +187,10 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y sshpass
         cd sdk
+        sshpass -p "${{ secrets.SFTP_PASSWORD }}" ssh ${{ secrets.SFTP_USER }}@your-sftp-server-address "mkdir -p /var/www/${{ matrix.platform }}"
         sshpass -p "${{ secrets.SFTP_PASSWORD }}" sftp -o StrictHostKeyChecking=no ${{ secrets.SFTP_USER }}@static.115.193.75.5.clients.your-server.de <<EOF
-          mkdir -p /var/www/${{ matrix.platform }}
+          lcd bin/targets
           cd /var/www/${{ matrix.platform }}
-          mput bin/targets/**/*.{ipk,Packages.gz}
+          mput *.{ipk,Packages.gz}
           bye
-         EOF
+        EOF
