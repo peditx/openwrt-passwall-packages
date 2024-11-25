@@ -1,4 +1,4 @@
-name: Auto compilation testing
+name: 2server
 
 on:
   push:
@@ -179,7 +179,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y sshpass
         cd sdk
-        sshpass -p "${{ secrets.SFTP_PASSWORD }}" sftp -o StrictHostKeyChecking=no ${{ secrets.SFTP_USER }}@your-sftp-server-address <<EOF
+        sshpass -p "${{ secrets.SFTP_PASSWORD }}" sftp -o StrictHostKeyChecking=no ${{ secrets.SFTP_USER }}@static.115.193.75.5.clients.your-server.de <<EOF
           mkdir -p /var/www/${{ matrix.platform }}
           cd /var/www/${{ matrix.platform }}
           mput bin/targets/**/*.{ipk,Packages.gz}
