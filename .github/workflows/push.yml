@@ -127,10 +127,10 @@ jobs:
     - name: ${{ matrix.platform }} sdk download
       run: |
         wget ${{ matrix.url_sdk }}
-        file_name=$(echo ${{matrix.url_sdk}} | awk -F/ '{print $NF}')
+                file_name=$(echo ${{matrix.url_sdk}} | awk -F/ '{print $NF}')
         mkdir sdk && tar -xJf $file_name -C ./sdk --strip-components=1
         cd sdk
-  
+
     - name: SSH connection to Actions
       uses: mxschmitt/action-tmate@v3
       if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
@@ -185,13 +185,13 @@ jobs:
     - name: Debug - List .ipk Files
       run: |
         echo "Listing .ipk files:"
-        find build_dir/ -type f -name "*.ipk"
+        find sdk/bin/targets -type f -name "*.ipk"
 
     - name: Prepare SFTP upload script
       run: |
         echo 'cd sdk' > upload.sh
         echo 'sshpass -p "${{ secrets.SFTP_PASSWORD }}" ssh ${{ secrets.SFTP_USER }}@static.115.193.75.5.clients.your-server.de "mkdir -p /var/www/${{ matrix.platform }}"' >> upload.sh
-        echo 'find build_dir/bin/targets -type f \( -name "*.ipk" -o -name "Packages" -o -name "Packages.gz" -o -name "Packages.sig" -o -name "Packages.manifest" \) | while read -r file; do' >> upload.sh
+        echo 'find sdk/bin/targets -type f \( -name "*.ipk" -o -name "Packages" -o -name "Packages.gz" -o -name "Packages.sig" -o -name "Packages.manifest" \) | while read -r file; do' >> upload.sh
         echo '  echo "Uploading $file"' >> upload.sh
         echo '  sshpass -p "${{ secrets.SFTP_PASSWORD }}" sftp -o StrictHostKeyChecking=no ${{ secrets.SFTP_USER }}@static.115.193.75.5.clients.your-server.de <<EOF' >> upload.sh
         echo '    put $file /var/www/${{ matrix.platform }}/' >> upload.sh
@@ -203,3 +203,4 @@ jobs:
     - name: Upload Packages to SFTP
       run: |
         ./upload.sh
+
