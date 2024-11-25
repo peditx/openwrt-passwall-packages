@@ -126,7 +126,7 @@ jobs:
     - name: ${{ matrix.platform }} sdk download
       run: |
         wget ${{ matrix.url_sdk }}
-        file_name=$(echo ${{matrix.url_sdk}} | awk -F/ '{print $NF}')
+         file_name=$(echo ${{matrix.url_sdk}} | awk -F/ '{print $NF}')
         mkdir sdk && tar -xJf $file_name -C ./sdk --strip-components=1
         cd sdk
 
@@ -163,6 +163,7 @@ jobs:
       id: compile
       run: |
         cd sdk
+        echo "Starting compilation process..."
         force_build="${{ github.event.inputs.force_build }}"
         if [ "$force_build" == "true" ]; then
           echo "Force build is enabled."
@@ -174,12 +175,13 @@ jobs:
         for DIR in "${DIRS[@]}"; do
           if [ -d "package/feeds/passwall_packages/$DIR" ]; then
             echo "Compiling changes in directory: $DIR"
-            make package/feeds/passwall_packages/$DIR/compile -j$(nproc) || { echo "Compile error in $DIR"; exit 1; }
+            make package/feeds/passwall_packages/$DIR/compile -j$(nproc) V=s || { echo "Compile error in $DIR"; exit 1; }
           else
             echo "Directory $DIR does not exist"
             exit 1
           fi
         done
+        echo "Compilation process completed."
 
     - name: Debug - List .ipk files in the entire project
       run: |
