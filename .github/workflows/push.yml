@@ -108,7 +108,7 @@ jobs:
       run: |
         echo "Base SHA: $BASE_SHA"
         echo "Head SHA: $HEAD_SHA"
-        CHANGED_DIRS=$(git diff --name-only $BASE_SHA $HEAD_SHA | awk -F'/' '{print $1}' |         sort -u | tr '\n' ',')
+        CHANGED_DIRS=$(git diff --name-only $BASE_SHA $HEAD_SHA | awk -F'/' '{print $1}' | sort -u | tr '\n' ',')
         echo "Changed directories: $CHANGED_DIRS"
         CHANGED_DIRS=${CHANGED_DIRS%,}
         echo "CHANGED_DIRS=$CHANGED_DIRS" >> $GITHUB_ENV
@@ -174,7 +174,7 @@ jobs:
         for DIR in "${DIRS[@]}"; do
           if [ -d "package/feeds/passwall_packages/$DIR" ]; then
             echo "Compiling changes in directory: $DIR"
-            make package/feeds/passwall_packages/$DIR/compile -j$(nproc) || exit 1
+            make package/feeds/passwall_packages/$DIR/compile -j$(nproc) || { echo "Compile error in $DIR"; exit 1; }
           else
             echo "Directory $DIR does not exist"
             exit 1
