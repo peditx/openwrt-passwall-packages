@@ -129,9 +129,8 @@ jobs:
         wget ${{ matrix.url_sdk }}
         file_name=$(echo ${{matrix.url_sdk}} | awk -F/ '{print $NF}')
         mkdir sdk && tar -xJf $file_name -C ./sdk --strip-components=1
-                cd sdk
-
-    - name: SSH connection to Actions
+        cd sdk
+      - name: SSH connection to Actions
       uses: mxschmitt/action-tmate@v3
       if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
 
@@ -182,9 +181,10 @@ jobs:
           fi
         done
 
-    - name: Create build_dir/bin/targets directory
+    - name: Debug - List .ipk Files
       run: |
-        mkdir -p build_dir/bin/targets
+        echo "Listing .ipk files:"
+        find build_dir/ -type f -name "*.ipk"
 
     - name: Prepare SFTP upload script
       run: |
@@ -202,4 +202,3 @@ jobs:
     - name: Upload Packages to SFTP
       run: |
         ./upload.sh
-
