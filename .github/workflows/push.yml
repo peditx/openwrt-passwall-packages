@@ -127,13 +127,13 @@ jobs:
     - name: ${{ matrix.platform }} sdk download
       run: |
         wget ${{ matrix.url_sdk }}
-                file_name=$(echo ${{matrix.url_sdk}} | awk -F/ '{print $NF}')
+        file_name=$(echo ${{matrix.url_sdk}} | awk -F/ '{print $NF}')
         mkdir sdk && tar -xJf $file_name -C ./sdk --strip-components=1
         cd sdk
 
     - name: SSH connection to Actions
       uses: mxschmitt/action-tmate@v3
-      if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
+      if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh != 'false') || contains(github.event.action, 'ssh')
 
     - name: ${{ matrix.platform }} feeds configuration packages
       run: |
@@ -141,7 +141,7 @@ jobs:
         echo "src-git base https://github.com/openwrt/openwrt.git;openwrt-23.05" > feeds.conf
         echo "src-git packages https://github.com/openwrt/packages.git;openwrt-23.05" >> feeds.conf
         echo "src-git luci https://github.com/openwrt/luci.git;openwrt-23.05" >> feeds.conf
-        echo "src-git routing https://git.openwrt.org/feed/routing.git;openwrt-23.05"  >> feeds.conf
+        echo "src-git routing https://git.openwrt.org/feed/routing.git;openwrt-23.05" >> feeds.conf
         echo "src-git passwall_packages https://github.com/${{ env.packages }}.git;main" >> feeds.conf
 
         ./scripts/feeds update -a
@@ -182,10 +182,11 @@ jobs:
           fi
         done
 
-    - name: Debug - List .ipk Files
+    - name: Debug - List all directories and files
       run: |
-        echo "Listing .ipk files:"
-        find sdk/bin/targets -type f -name "*.ipk"
+        echo "Listing all directories and files:"
+        find . -type d -print
+        find . -type f -print
 
     - name: Prepare SFTP upload script
       run: |
@@ -203,4 +204,3 @@ jobs:
     - name: Upload Packages to SFTP
       run: |
         ./upload.sh
-
