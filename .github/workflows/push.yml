@@ -181,7 +181,10 @@ jobs:
             exit 1
           fi
         done
-
+    
+    - name: Enable Debug
+      run: set -x
+      
     - name: Upload Packages to SFTP
       run: |
         sudo apt-get update
