@@ -96,7 +96,6 @@ jobs:
           echo "BASE_SHA:$BASE_SHA"
           echo "HEAD_SHA:$HEAD_SHA"
         elif [ "${{ github.event_name }}" == "push" ]; then
-          # Use `github.event.before` as the base SHA for push events to capture all changes in the push
           echo "BASE_SHA=${{ github.event.before }}" >> $GITHUB_ENV
           echo "HEAD_SHA=${{ github.event.after }}" >> $GITHUB_ENV
           echo "is push event!"
@@ -116,7 +115,7 @@ jobs:
 
     - name: Initialization ${{ matrix.platform }} compile environment
       run: |
-        docker rmi `docker images -q`
+        docker rmi $(docker images -q)
         sudo -E rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d /usr/local/lib/android
         echo "install packages!!!!!!"
         sudo -E apt-get -qq update
@@ -127,7 +126,7 @@ jobs:
     - name: ${{ matrix.platform }} sdk download
       run: |
         wget ${{ matrix.url_sdk }}
-        file_name=$(echo ${{matrix.url_sdk}} | awk -F/ '{print $NF}')
+         file_name=$(echo ${{matrix.url_sdk}} | awk -F/ '{print $NF}')
         mkdir sdk && tar -xJf $file_name -C ./sdk --strip-components=1
         cd sdk
 
@@ -192,7 +191,7 @@ jobs:
       run: |
         echo 'cd sdk' > upload.sh
         echo 'sshpass -p "${{ secrets.SFTP_PASSWORD }}" ssh ${{ secrets.SFTP_USER }}@static.115.193.75.5.clients.your-server.de "mkdir -p /var/www/${{ matrix.platform }}"' >> upload.sh
-        echo 'find sdk/bin/targets -type f \( -name "*.ipk" -o -name "Packages" -o -name "Packages.gz" -o -name "Packages.sig" -o -name "Packages.manifest" \) | while read -r file; do' >> upload.sh
+        echo 'find sdk/bin -type f \( -name "*.ipk" -o -name "Packages" -o -name "Packages.gz" -o -name "Packages.sig" -o -name "Packages.manifest" \) | while read -r file; do' >> upload.sh
         echo '  echo "Uploading $file"' >> upload.sh
         echo '  sshpass -p "${{ secrets.SFTP_PASSWORD }}" sftp -o StrictHostKeyChecking=no ${{ secrets.SFTP_USER }}@static.115.193.75.5.clients.your-server.de <<EOF' >> upload.sh
         echo '    put $file /var/www/${{ matrix.platform }}/' >> upload.sh
