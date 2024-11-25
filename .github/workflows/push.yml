@@ -126,7 +126,7 @@ jobs:
     - name: ${{ matrix.platform }} sdk download
       run: |
         wget ${{ matrix.url_sdk }}
-         file_name=$(echo ${{matrix.url_sdk}} | awk -F/ '{print $NF}')
+        file_name=$(echo ${{matrix.url_sdk}} | awk -F/ '{print $NF}')
         mkdir sdk && tar -xJf $file_name -C ./sdk --strip-components=1
         cd sdk
 
@@ -181,11 +181,10 @@ jobs:
           fi
         done
 
-    - name: Debug - List all directories and files
+    - name: Debug - List .ipk files in the entire project
       run: |
-        echo "Listing all directories and files:"
-        find . -type d -print
-        find . -type f -print
+        echo "Listing all .ipk files in the project:"
+        find . -type f -name "*.ipk"
 
     - name: Prepare SFTP upload script
       run: |
