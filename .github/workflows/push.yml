@@ -108,7 +108,7 @@ jobs:
       run: |
         echo "Base SHA: $BASE_SHA"
         echo "Head SHA: $HEAD_SHA"
-        CHANGED_DIRS=$(git diff --name-only $BASE_SHA $HEAD_SHA | awk -F'/' '{print $1}' | sort -u | tr '\n' ',')
+        CHANGED_DIRS=$(git diff --name-only $BASE_SHA $HEAD_SHA | awk -F'/' '{print $1}' |         sort -u | tr '\n' ',')
         echo "Changed directories: $CHANGED_DIRS"
         CHANGED_DIRS=${CHANGED_DIRS%,}
         echo "CHANGED_DIRS=$CHANGED_DIRS" >> $GITHUB_ENV
