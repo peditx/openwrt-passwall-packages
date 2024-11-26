@@ -103,6 +103,9 @@ jobs:
           echo "HEAD_SHA:$HEAD_SHA"
         fi
 
+    - name: Create bin directory
+      run: mkdir -p bin
+
     - name: Detect Changed Directories
       id: detect-changes
       run: |
@@ -156,7 +159,7 @@ jobs:
     - name: ${{ matrix.platform }} download
       run: |
         cd sdk
-        make download -j8
+        make download -j8 V=sc
         find dl -size -1024c -exec ls -l {} \;
 
     - name: Compile Changed Packages
@@ -165,7 +168,7 @@ jobs:
         cd sdk
         echo "Starting compilation process..."
         force_build="${{ github.event.inputs.force_build }}"
-        if [ "$force_build" == "true" ]; then
+        if [ "$force_build" == "true" ];ن
           echo "Force build is enabled."
         elif [ -z "$CHANGED_DIRS" ]; then
           echo "No changes detected in passwall_packages"
@@ -173,7 +176,7 @@ jobs:
         fi
         IFS=',' read -ra DIRS <<< "$CHANGED_DIRS"
         for DIR in "${DIRS[@]}"; do
-          if [ -d "package/feeds/passwall_packages/$DIR" ]; then
+          if [ -d "package/feeds/passwall_packages/$DIR" ];ن
             echo "Compiling changes in directory: $DIR"
             make package/feeds/passwall_packages/$DIR/compile -j$(nproc) V=s || { echo "Compile error in $DIR"; exit 1; }
           else
@@ -182,6 +185,11 @@ jobs:
           fi
         done
         echo "Compilation process completed."
+
+    - name: List sdk directory structure
+      run: |
+        echo "Listing sdk directory structure:"
+        ls -R sdk
 
     - name: Debug - List .ipk files in bin
       run: |
