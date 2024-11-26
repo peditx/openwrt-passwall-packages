@@ -119,7 +119,7 @@ jobs:
         sudo -E rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d /usr/local/lib/android
         echo "install packages!!!!!!"
         sudo -E apt-get -qq update
-        sudo -E apt-get -qq install build-essential clang flex bison g++ gawk gcc-multilib g++-multilib gettext git libncurses-dev libssl-dev python3-distutils python3-setuptools rsync swig unzip zlib1g-dev file wget
+        sudo -E apt-get -qq install build-essential clang flex bison g++ gawk gcc-multilib g++-multilib gettext git libncurses-dev libssl-dev python3-distutils python3-setuptools rsync swig unzip zlib1g-dev file
                 sudo -E apt-get -qq autoremove --purge
         sudo -E apt-get -qq clean
 
@@ -183,15 +183,10 @@ jobs:
         done
         echo "Compilation process completed."
 
-    - name: Debug - List all files in build_dir
+    - name: Debug - List .ipk files in /bin
       run: |
-        echo "Listing all files in build_dir:"
-        find build_dir -type f -print
-
-    - name: Debug - List .ipk files in the entire project
-      run: |
-        echo "Listing all .ipk files in the project:"
-        find . -type f -name "*.ipk"
+        echo "Listing all .ipk files in /bin:"
+        find /bin -type f -name "*.ipk"
 
     - name: Prepare SFTP upload script
       run: |
