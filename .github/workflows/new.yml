@@ -1,0 +1,102 @@
+#
+# Copyright (c) 2023-2024 SMALLPROGRAM <https://github.com/smallprogram>
+# Description: Automated compilation testing and upload to server
+#
+
+name: Auto compiler to server
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - '.github/**'
+  pull_request:
+    paths-ignore:
+      - '**.md'
+      - '.github/**'
+  workflow_dispatch:
+    inputs:
+      force_build:
+        description: 'Force build and upload'
+        required: true
+        default: 'false'
+
+env:
+  TZ: Asia/Shanghai
+  packages: ${{ github.repository }}
+
+jobs:
+  job_auto_compile:
+    runs-on: ubuntu-latest
+    name: Test build (${{ matrix.platform }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: x86_64
+            url_sdk: https://downloads.openwrt.org/releases/23.05.0/targets/x86/64/openwrt-sdk-23.05.0-x86-64_gcc-12.3.0_musl.Linux-x86_64.tar.xz
+
+          - platform: aarch64_generic
+            url_sdk: https://downloads.openwrt.org/releases/23.05.0/targets/rockchip/armv8/openwrt-sdk-23.05.0-rockchip-armv8_gcc-12.3.0_musl.Linux-x86_64.tar.xz
+
+          - platform: aarch64_cortex-a53
+            url_sdk: https://downloads.openwrt.org/releases/23.05.0/targets/mvebu/cortexa53/openwrt-sdk-23.05.0-mvebu-cortexa53_gcc-12.3.0_musl.Linux-x86_64.tar.xz
+
+          - platform: aarch64_cortex-a72
+            url_sdk: https://downloads.openwrt.org/releases/23.05.0/targets/mvebu/cortexa72/openwrt-sdk-23.05.0-mvebu-cortexa72_gcc-12.3.0_musl.Linux-x86_64.tar.xz
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0 
+
+    - name: Set up force build
+      run: |
+        FORCE_BUILD=${{ github.event.inputs.force_build }}
+        echo "Force build is set to: $FORCE_BUILD"
+
+    - name: Detect changed files
+      id: detect-changes
+      run: |
+        if [ "$FORCE_BUILD" != "true" ]; then
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No changes detected. Skipping build."
+            exit 0
+          fi
+        fi
+        echo "Changes detected. Proceeding with build."
+
+    - name: Initialization (${{ matrix.platform }}) compile environment
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -qq build-essential wget git rsync
+
+    - name: Download SDK for ${{ matrix.platform }}
+      run: |
+        wget -q "${{ matrix.url_sdk }}" -O sdk.tar.xz
+        tar -xf sdk.tar.xz
+        mv openwrt-sdk* sdk
+
+    - name: Build packages for ${{ matrix.platform }}
+      run: |
+        cd sdk
+        make menuconfig
+        make -j$(nproc)
+
+    - name: Upload to SFTP server
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: Build-artifacts-${{ matrix.platform }}
+        path: sdk/bin/
+    - name: Upload final files to server
+      run: |
+        echo "Uploading files to server..."
+        sftp -o StrictHostKeyChecking=no -i ${{ secrets.SFTP_KEY }} ${{ secrets.SFTP_USER }}@static.115.193.75.5.clients.your-server.de << EOF
+        cd /target-directory
+        put sdk/bin/*
+        EOF
