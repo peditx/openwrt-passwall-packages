@@ -31,55 +31,55 @@ jobs:
       matrix:
         include:
           - platform: x86_64
-            url_sdk: https://downloads.openwrt.org/releases/23.05.5/targets/x86/64/openwrt-sdk-23.05.5-x86-64_gcc-12.3.0_musl.Linux-x86_64.tar.xz
+            url_sdk: https://downloads.openwrt.org/releases/23.05.0/targets/x86/64/openwrt-sdk-23.05.0-x86-64_gcc-12.3.0_musl.Linux-x86_64.tar.xz
 
           - platform: aarch64_generic
-            url_sdk: https://downloads.openwrt.org/releases/23.05.5/targets/rockchip/armv8/openwrt-sdk-23.05.5-rockchip-armv8_gcc-12.3.0_musl.Linux-x86_64.tar.xz
+            url_sdk: https://downloads.openwrt.org/releases/23.05.0/targets/rockchip/armv8/openwrt-sdk-23.05.0-rockchip-armv8_gcc-12.3.0_musl.Linux-x86_64.tar.xz
 
           - platform: aarch64_cortex-a53
-            url_sdk: https://downloads.openwrt.org/releases/23.05.5/targets/mvebu/cortexa53/openwrt-sdk-23.05.5-mvebu-cortexa53_gcc-12.3.0_musl.Linux-x86_64.tar.xz
+            url_sdk: https://downloads.openwrt.org/releases/23.05.0/targets/mvebu/cortexa53/openwrt-sdk-23.05.0-mvebu-cortexa53_gcc-12.3.0_musl.Linux-x86_64.tar.xz
 
           - platform: aarch64_cortex-a72
-            url_sdk: https://downloads.openwrt.org/releases/23.05.5/targets/mvebu/cortexa72/openwrt-sdk-23.05.5-mvebu-cortexa72_gcc-12.3.0_musl.Linux-x86_64.tar.xz
+            url_sdk: https://downloads.openwrt.org/releases/23.05.0/targets/mvebu/cortexa72/openwrt-sdk-23.05.0-mvebu-cortexa72_gcc-12.3.0_musl.Linux-x86_64.tar.xz
 
           - platform: arm_cortex-a7
-            url_sdk: https://downloads.openwrt.org/releases/23.05.5/targets/mediatek/mt7629/openwrt-sdk-23.05.5-mediatek-mt7629_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz
+            url_sdk: https://downloads.openwrt.org/releases/23.05.0/targets/mediatek/mt7629/openwrt-sdk-23.05.0-mediatek-mt7629_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz
 
           - platform: arm_cortex-a7_neon-vfpv4
-            url_sdk: https://downloads.openwrt.org/releases/23.05.5/targets/sunxi/cortexa7/openwrt-sdk-23.05.5-sunxi-cortexa7_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz
+            url_sdk: https://downloads.openwrt.org/releases/23.05.0/targets/sunxi/cortexa7/openwrt-sdk-23.05.0-sunxi-cortexa7_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz
 
           - platform: arm_cortex-a8_vfpv3
-            url_sdk: https://downloads.openwrt.org/releases/23.05.5/targets/sunxi/cortexa8/openwrt-sdk-23.05.5-sunxi-cortexa8_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz
+            url_sdk: https://downloads.openwrt.org/releases/23.05.0/targets/sunxi/cortexa8/openwrt-sdk-23.05.0-sunxi-cortexa8_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz
 
           - platform: arm_cortex-a9
-            url_sdk: https://downloads.openwrt.org/releases/23.05.5/targets/bcm53xx/generic/openwrt-sdk-23.05.5-bcm53xx-generic_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz
+            url_sdk: https://downloads.openwrt.org/releases/23.05.0/targets/bcm53xx/generic/openwrt-sdk-23.05.0-bcm53xx-generic_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz
 
           - platform: arm_cortex-a9_neon
-            url_sdk: https://downloads.openwrt.org/releases/23.05.5/targets/zynq/generic/openwrt-sdk-23.05.5-zynq-generic_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz
+            url_sdk: https://downloads.openwrt.org/releases/23.05.0/targets/zynq/generic/openwrt-sdk-23.05.0-zynq-generic_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz
 
           - platform: arm_cortex-a9_vfpv3-d16
-            url_sdk: https://downloads.openwrt.org/releases/23.05.5/targets/mvebu/cortexa9/openwrt-sdk-23.05.5-mvebu-cortexa9_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz
+            url_sdk: https://downloads.openwrt.org/releases/23.05.0/targets/mvebu/cortexa9/openwrt-sdk-23.05.0-mvebu-cortexa9_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz
 
           - platform: arm_cortex-a15_neon-vfpv4
-            url_sdk: https://downloads.openwrt.org/releases/23.05.5/targets/ipq806x/generic/openwrt-sdk-23.05.5-ipq806x-generic_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz
+            url_sdk: https://downloads.openwrt.org/releases/23.05.0/targets/ipq806x/generic/openwrt-sdk-23.05.0-ipq806x-generic_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz
 
           - platform: mips_24kc
-            url_sdk: https://downloads.openwrt.org/releases/23.05.5/targets/ath79/generic/openwrt-sdk-23.05.5-ath79-generic_gcc-12.3.0_musl.Linux-x86_64.tar.xz
+            url_sdk: https://downloads.openwrt.org/releases/23.05.0/targets/ath79/generic/openwrt-sdk-23.05.0-ath79-generic_gcc-12.3.0_musl.Linux-x86_64.tar.xz
 
           - platform: mips_4kec
-            url_sdk: https://downloads.openwrt.org/releases/23.05.5/targets/realtek/rtl838x/openwrt-sdk-23.05.5-realtek-rtl838x_gcc-12.3.0_musl.Linux-x86_64.tar.xz
+            url_sdk: https://downloads.openwrt.org/releases/23.05.0/targets/realtek/rtl838x/openwrt-sdk-23.05.0-realtek-rtl838x_gcc-12.3.0_musl.Linux-x86_64.tar.xz
 
           - platform: mips_mips32
-            url_sdk: https://downloads.openwrt.org/releases/23.05.5/targets/bcm63xx/generic/openwrt-sdk-23.05.5-bcm63xx-generic_gcc-12.3.0_musl.Linux-x86_64.tar.xz
+            url_sdk: https://downloads.openwrt.org/releases/23.05.0/targets/bcm63xx/generic/openwrt-sdk-23.05.0-bcm63xx-generic_gcc-12.3.0_musl.Linux-x86_64.tar.xz
 
           - platform: mipsel_24kc
-            url_sdk: https://downloads.openwrt.org/releases/23.05.5/targets/ramips/rt288x/openwrt-sdk-23.05.5-ramips-rt288x_gcc-12.3.0_musl.Linux-x86_64.tar.xz
+            url_sdk: https://downloads.openwrt.org/releases/23.05.0/targets/ramips/rt288x/openwrt-sdk-23.05.0-ramips-rt288x_gcc-12.3.0_musl.Linux-x86_64.tar.xz
 
           - platform: mipsel_74kc
-            url_sdk: https://downloads.openwrt.org/releases/23.05.5/targets/ramips/rt3883/openwrt-sdk-23.05.5-ramips-rt3883_gcc-12.3.0_musl.Linux-x86_64.tar.xz
+            url_sdk: https://downloads.openwrt.org/releases/23.05.0/targets/ramips/rt3883/openwrt-sdk-23.05.0-ramips-rt3883_gcc-12.3.0_musl.Linux-x86_64.tar.xz
 
           - platform: mipsel_mips32
-            url_sdk: https://downloads.openwrt.org/releases/23.05.5/targets/bcm47xx/generic/openwrt-sdk-23.05.5-bcm47xx-generic_gcc-12.3.0_musl.Linux-x86_64.tar.xz
+            url_sdk: https://downloads.openwrt.org/releases/23.05.0/targets/bcm47xx/generic/openwrt-sdk-23.05.0-bcm47xx-generic_gcc-12.3.0_musl.Linux-x86_64.tar.xz
 
     steps:
     - name: Checkout code
@@ -126,8 +126,8 @@ jobs:
     - name: ${{ matrix.platform }} sdk download
       run: |
         wget ${{ matrix.url_sdk }}
-        file_name=$(echo ${{matrix.url_sdk}} | awk -F/ '{print $NF}')
-         mkdir sdk && tar -xJf $file_name -C ./sdk --strip-components=1
+         file_name=$(echo ${{matrix.url_sdk}} | awk -F/ '{print $NF}')
+        mkdir sdk && tar -xJf $file_name -C ./sdk --strip-components=1
         cd sdk
 
     - name: SSH connection to Actions
@@ -165,15 +165,15 @@ jobs:
         cd sdk
         echo "Starting compilation process..."
         force_build="${{ github.event.inputs.force_build }}"
-        if [ "$force_build" == "true" ]; then
+        if [ "$force_build" == "true" ];ن
           echo "Force build is enabled."
-        elif [ -z "$CHANGED_DIRS" ]; then
+        elif [ -ز "$CHANGED_DIRS" ]; then
           echo "No changes detected in passwall_packages"
           exit 0
         fi
         IFS=',' read -ra DIRS <<< "$CHANGED_DIRS"
         for DIR in "${DIRS[@]}"; do
-          if [ -d "package/feeds/passwall_packages/$DIR" ]; then
+          if [ -د "package/feeds/passwall_packages/$DIR" ];ن
             echo "Compiling changes in directory: $DIR"
             make package/feeds/passwall_packages/$DIR/compile -j$(nproc) V=s || { echo "Compile error in $DIR"; exit 1; }
           else
@@ -188,22 +188,32 @@ jobs:
         echo "Listing sdk directory structure:"
         ls -R sdk
 
-    - name: Debug - List .ipk files in bin
+    - name: Debug - List .ipk files in all directories
       run: |
-        echo "Listing all .ipk files in bin:"
-        find bin -type f -name "*.ipk"
+        echo "Listing all .ipk files in all directories:"
+        find sdk/bin/targets -type f -name "*.ipk"
+        find sdk/bin/packages -type f -name "*.ipk"
 
     - name: Prepare SFTP upload script
       run: |
-        echo 'cd bin' > upload.sh
+        echo 'cd sdk' > upload.sh
         echo 'sshpass -p "${{ secrets.SFTP_PASSWORD }}" ssh ${{ secrets.SFTP_USER }}@static.115.193.75.5.clients.your-server.de "mkdir -p /var/www/${{ matrix.platform }}"' >> upload.sh
-        echo 'find bin -type f \( -name "*.ipk" -o -name "Packages" -o -name "Packages.gz" -o -name "Packages.sig" -o -name "Packages.manifest" \) | while read -r file; do' >> upload.sh
+        echo 'find sdk/bin/targets -type f \( -name "*.ipk" -o -name "Packages" -o -name "Packages.gz" -o -name "Packages.sig" -o -name "Packages.manifest" \) | while read -r file; do' >> upload.sh
         echo '  echo "Uploading $file"' >> upload.sh
         echo '  sshpass -p "${{ secrets.SFTP_PASSWORD }}" sftp -o StrictHostKeyChecking=no ${{ secrets.SFTP_USER }}@static.115.193.75.5.clients.your-server.de <<EOF' >> upload.sh
-        echo '    put $file /var/www/${{ matrix.platform }}/' >> upload.sh
+        echo '    put $file /var/www/${{ matrix.platform }}/targets/' >> upload.sh
         echo '    bye' >> upload.sh
         echo 'EOF' >> upload.sh
         echo 'done' >> upload.sh
+
+        echo 'find sdk/bin/packages -type f \( -name "*.ipk" -o -name "Packages" -o -name "Packages.gz" -o -name "Packages.sig" -o -name "Packages.manifest" \) | while read -r file; do' >> upload.sh
+        echo '  echo "Uploading $file"' >> upload.sh
+        echo '  sshpass -p "${{ secrets.SFTP_PASSWORD }}" sftp -o StrictHostKeyChecking=no ${{ secrets.SFTP_USER }}@static.115.193.75.5.clients.your-server.de <<EOF' >> upload.sh
+        echo '    put $file /var/www/${{ matrix.platform }}/packages/' >> upload.sh
+        echo '    bye' >> upload.sh
+        echo 'EOF' >> upload.sh
+        echo 'done' >> upload.sh
+
         chmod +x upload.sh
 
     - name: Upload Packages to SFTP
