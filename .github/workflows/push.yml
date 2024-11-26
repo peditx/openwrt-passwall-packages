@@ -183,16 +183,16 @@ jobs:
         done
         echo "Compilation process completed."
 
-    - name: Debug - List .ipk files in sdk/bin
+    - name: Debug - List .ipk files in bin
       run: |
-        echo "Listing all .ipk files in sdk/bin:"
-        find sdk/bin -type f -name "*.ipk"
+        echo "Listing all .ipk files in bin:"
+        find bin -type f -name "*.ipk"
 
     - name: Prepare SFTP upload script
       run: |
-        echo 'cd sdk' > upload.sh
+        echo 'cd bin' > upload.sh
         echo 'sshpass -p "${{ secrets.SFTP_PASSWORD }}" ssh ${{ secrets.SFTP_USER }}@static.115.193.75.5.clients.your-server.de "mkdir -p /var/www/${{ matrix.platform }}"' >> upload.sh
-        echo 'find sdk/bin -type f \( -name "*.ipk" -o -name "Packages" -o -name "Packages.gz" -o -name "Packages.sig" -o -name "Packages.manifest" \) | while read -r file; do' >> upload.sh
+        echo 'find bin -type f \( -name "*.ipk" -o -name "Packages" -o -name "Packages.gz" -o -name "Packages.sig" -o -name "Packages.manifest" \) | while read -r file; do' >> upload.sh
         echo '  echo "Uploading $file"' >> upload.sh
         echo '  sshpass -p "${{ secrets.SFTP_PASSWORD }}" sftp -o StrictHostKeyChecking=no ${{ secrets.SFTP_USER }}@static.115.193.75.5.clients.your-server.de <<EOF' >> upload.sh
         echo '    put $file /var/www/${{ matrix.platform }}/' >> upload.sh
