@@ -1,58 +1,68 @@
-name: Build and Upload OpenWrt Passwall Packages
+name: Build and Upload OpenWrt Packages
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch: # قابلیت اجرای دستی
 
 jobs:
   build-and-upload:
     runs-on: ubuntu-latest
 
-    env:
-      SFTP_HOST: static.115.193.75.5.clients.your-server.de
-      REPO_URL: https://github.com/peditx/openwrt-passwall-packages.git
-
     steps:
-    # مرحله 1: کلون کردن ریپازیتوری
-    - name: Checkout Repository
-      uses: actions/checkout@v3
+      # 1. دریافت ریپازیتوری
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
-    # مرحله 2: تعریف معماری‌های OpenWrt
-    - name: Define Architectures
-      id: architectures
-      run: |
-        echo "architectures=x86_64 arm_cortex-a7 arm_cortex-a9 arm_cortex-a53 arm_cortex-a72 aarch64_cortex-a53 aarch64_cortex-a72 aarch64_generic i386 mipsel_24kc mipsel_74kc mips_24kc mips_mips32 mips_mips64r2 powerpc_8540 powerpc_970 sparc64" >> $GITHUB_ENV
+      # 2. نصب ابزارهای مورد نیاز برای کامپایل
+      - name: Setup Build Environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libncurses5-dev gawk git ccache gettext zlib1g-dev libssl-dev xsltproc file unzip wget python3
 
-    # مرحله 3: ایجاد پوشه برای هر معماری و کپی فایل‌ها
-    - name: Organize Makefiles
-      run: |
-        mkdir -p makefiles
-        for arch in $architectures; do
-          mkdir -p "makefiles/$arch"
-          if [ -d "./package/$arch" ]; then
-            cp -r "./package/$arch"/* "makefiles/$arch/"
-          else
-            echo "Warning: No files found for $arch, skipping."
-          fi
-        done
+      # 3. دانلود و نصب SDK برای معماری‌های مختلف
+      - name: Download and Setup OpenWrt SDK
+        run: |
+          architectures="aarch64_cortex-a53 aarch64_cortex-a72 aarch64_generic arm_arm1176jzf-s arm_cortex-a7_neon-vfpv4 arm_cortex-a9 arm_cortex-a15_neon-vfpv4 arm_cortex-a53_neon-vfpv4 arm_cortex-a72_neon-vfpv4 arm_xscale i386_generic mips_24kc mips_mips32 mipsel_24kc mipsel_mips32 powerpc_464fp powerpc_8540 x86_64"
+          mkdir -p sdk
+          for arch in $architectures; do
+            wget -q "https://downloads.openwrt.org/releases/23.05.0/targets/${arch}/sdk.tar.xz" -O "sdk/$arch-sdk.tar.xz"
+            mkdir -p "sdk/$arch"
+            tar -xf "sdk/$arch-sdk.tar.xz" -C "sdk/$arch" --strip-components=1
+          done
 
-    # مرحله 4: ایجاد فایل‌های package.gz و package.manifest
-    - name: Create Metadata Files
-      run: |
-        for arch in $architectures; do
-          echo "Creating package.gz and package.manifest for $arch"
-          tar -czf "makefiles/$arch/package.gz" -C "makefiles/$arch" .
-          echo "Manifest for $arch packages" > "makefiles/$arch/package.manifest"
-        done
+      # 4. کامپایل فایل‌های میک برای هر معماری
+      - name: Build Packages for All Architectures
+        run: |
+          architectures="aarch64_cortex-a53 aarch64_cortex-a72 aarch64_generic arm_arm1176jzf-s arm_cortex-a7_neon-vfpv4 arm_cortex-a9 arm_cortex-a15_neon-vfpv4 arm_cortex-a53_neon-vfpv4 arm_cortex-a72_neon-vfpv4 arm_xscale i386_generic mips_24kc mips_mips32 mipsel_24kc mipsel_mips32 powerpc_464fp powerpc_8540 x86_64"
+          for arch in $architectures; do
+            echo "Building for architecture: $arch"
+            pushd sdk/$arch
+            make package/feeds/packages/compile V=s
+            popd
+          done
 
-    # مرحله 5: آپلود فایل‌ها به SFTP
-    - name: Upload to SFTP
-      uses: appleboy/scp-action@v0.1.7
-      with:
-        host: ${{ env.SFTP_HOST }}
-        username: ${{ secrets.SFTP_USERNAME }}
-        password: ${{ secrets.SFTP_PASSWORD }}
-        source: ./makefiles/*
-        target: /path/to/destination
+      # 5. بسته‌بندی خروجی‌ها
+      - name: Create Metadata and Package Files
+        run: |
+          architectures="aarch64_cortex-a53 aarch64_cortex-a72 aarch64_generic arm_arm1176jzf-s arm_cortex-a7_neon-vfpv4 arm_cortex-a9 arm_cortex-a15_neon-vfpv4 arm_cortex-a53_neon-vfpv4 arm_cortex-a72_neon-vfpv4 arm_xscale i386_generic mips_24kc mips_mips32 mipsel_24kc mipsel_mips32 powerpc_464fp powerpc_8540 x86_64"
+          for arch in $architectures; do
+            mkdir -p output/$arch
+            cp -r sdk/$arch/bin/packages/* output/$arch/
+
+            # ایجاد package.gz
+            tar --warning=no-file-changed -czf "output/$arch/package.gz" -C "output/$arch" .
+
+            # ایجاد package.manifest
+            echo "Manifest for $arch packages" > "output/$arch/package.manifest"
+          done
+
+      # 6. آپلود به سرور SFTP
+      - name: Upload to SFTP Server
+        uses: garygrossgarten/github-action-scp@v1.1.2
+        with:
+          local: output
+          remote: /path/to/remote/directory
+          host: static.115.193.75.5.clients.your-server.de
+          username: ${{ secrets.SFTP_USER }}
+          password: ${{ secrets.SFTP_PASS }}
