@@ -56,6 +56,18 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential libncurses5-dev gawk git ccache gettext zlib1g-dev libssl-dev xsltproc file unzip wget python3
 
+      - name: Install libmaxminddb
+        run: |
+          git clone https://github.com/maxmind/libmaxminddb.git
+          cd libmaxminddb
+          ./bootstrap
+          ./configure
+          make
+          sudo make install
+          sudo sh -c "echo /usr/local/lib  >> /etc/ld.so.conf.d/local.conf"
+          sudo ldconfig
+          cd ..
+
       - name: Download and extract SDK for ${{ matrix.platform }}
         run: |
           case "${{ matrix.platform }}" in
@@ -131,9 +143,9 @@ jobs:
           echo "src-git base https://github.com/openwrt/openwrt.git;openwrt-23.05" > feeds.conf
           echo "src-git packages https://github.com/openwrt/packages.git;openwrt-23.05" >> feeds.conf
           echo "src-git luci https://github.com/openwrt/luci.git;openwrt-23.05" >> feeds.conf
-          echo "src-git routing https://git.openwrt.org/feed/routing.git;openwrt-23.05" >> feeds.conf
+            echo "src-git routing https://git.openwrt.org/feed/routing.git;openwrt-23.05" >> feeds.conf
           echo "src-git passwall_packages https://github.com/peditx/openwrt-passwall-packages.git;main" >> feeds.conf
-             ./scripts/feeds update -a
+          ./scripts/feeds update -a
           ./scripts/feeds install -a || { echo "Feed update/install failed"; exit 1; }
           ./scripts/feeds install -a -f -p passwall_packages || { echo "Passwall packages install failed"; exit 1; }
           echo "CONFIG_ALL_NONSHARED=n" > .config
@@ -147,7 +159,6 @@ jobs:
         run: |
           cd sdk
           make download -j8
-          find dl -size -1024c -exec ls -l {} \;
 
       - name: Compile Packages
         id: compile
