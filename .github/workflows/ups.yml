@@ -31,20 +31,16 @@ jobs:
           - mipsel_mips32
 
     steps:
-      # 1. دریافت ریپازیتوری
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # 2. نصب ابزارهای مورد نیاز برای کامپایل
       - name: Setup Build Environment
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential libncurses5-dev gawk git ccache gettext zlib1g-dev libssl-dev xsltproc file unzip wget python3
 
-      # 3. دریافت SDK برای معماری هدف
       - name: Download and extract SDK for ${{ matrix.platform }}
         run: |
-          # Define the SDK URLs based on the platform
           case "${{ matrix.platform }}" in
             x86_64)
               url="https://downloads.openwrt.org/releases/23.05.0/targets/x86/64/openwrt-sdk-23.05.0-x86-64_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
@@ -103,20 +99,15 @@ jobs:
               ;;
           esac
 
-          # استخراج SDK
           wget -q $url -O openwrt-sdk.tar.xz
           tar -xf openwrt-sdk.tar.xz
-
-          # تغییر نام پوشه به sdk
           mv openwrt-sdk-* sdk
 
-          # چک کردن وجود پوشه sdk
           if [ ! -d "sdk" ]; then
             echo "SDK extraction failed or sdk directory not found."
             exit 1
           fi
 
-      # 4. تنظیم Feed‌ها
       - name: ${{ matrix.platform }} feeds configuration packages
         run: |
           cd sdk
@@ -125,20 +116,21 @@ jobs:
           ./scripts/feeds install -a -f -p passwall_packages
           make defconfig
 
-      # 5. کامپایل فایل‌های میک برای معماری
       - name: Build Packages for ${{ matrix.platform }}
         run: |
-          echo "Building for architecture: ${{ matrix.platform }}"
-          pushd sdk/${{ matrix.platform }}
-          make package/feeds/packages/compile V=s
-          popd
+          cd sdk
+          make package/feeds/passwall_packages/compile V=s
 
-      # 6. بسته‌بندی خروجی‌ها
+      - name: Debug Information
+        run: |
+          echo "Listing sdk/bin directory structure:"
+          ls -R sdk/bin
+
       - name: Package Output
         run: |
           mkdir -p output/${{ matrix.platform }}
-          cp -r sdk/${{ matrix.platform }}/bin/* output/${{ matrix.platform }}/
-          
+          cp -r sdk/bin/* output/${{ matrix.platform }}/
+
       - name: Upload to SFTP server
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -148,4 +140,3 @@ jobs:
           port: 22
           source: "output/${{ matrix.platform }}/*"
           target: "/var/www/html/passwall-packages/${{ matrix.platform }}/"
-
