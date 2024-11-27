@@ -1,4 +1,4 @@
-name: Build OpenWrt SDK for Multiple Architectures
+name: X
 
 on:
   push:
