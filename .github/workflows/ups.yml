@@ -49,10 +49,10 @@ jobs:
 
     # مرحله 5: آپلود فایل‌ها به SFTP
     - name: Upload to SFTP
-      uses: atmoz/sftp-action@v1
+      uses: appleboy/scp-action@v0.1.7
       with:
+        host: ${{ env.SFTP_HOST }}
         username: ${{ secrets.SFTP_USERNAME }}
         password: ${{ secrets.SFTP_PASSWORD }}
-        server: ${{ env.SFTP_HOST }}
-        remote_path: /path/to/destination
-        local_path: ./makefiles
+        source: ./makefiles/*
+        target: /path/to/destination
