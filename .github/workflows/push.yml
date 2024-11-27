@@ -1,4 +1,4 @@
-name: Push
+name: Build OpenWrt SDK for Multiple Architectures
 
 on:
   push:
@@ -23,109 +23,159 @@ env:
   packages: ${{ github.repository }}
 
 jobs:
-  job_auto_compile:
+  build:
     runs-on: ubuntu-latest
-    name: test build (${{ matrix.platform }})
+
     strategy:
-      fail-fast: false
       matrix:
-        include:
-          - platform: x86_64
-            url_sdk: https://downloads.openwrt.org/releases/23.05.0/targets/x86/64/openwrt-sdk-23.05.0-x86-64_gcc-12.3.0_musl.Linux-x86_64.tar.xz
-          # ... add more platforms here ...
+        platform:
+          - x86_64
+          - aarch64_generic
+          - aarch64_cortex-a53
+          - aarch64_cortex-a72
+          - arm_cortex-a7
+          - arm_cortex-a7_neon-vfpv4
+          - arm_cortex-a8_vfpv3
+          - arm_cortex-a9
+          - arm_cortex-a9_neon
+          - arm_cortex-a9_vfpv3-d16
+          - arm_cortex-a15_neon-vfpv4
+          - mips_24kc
+          - mips_4kec
+          - mips_mips32
+          - mipsel_24kc
+          - mipsel_74kc
+          - mipsel_mips32
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0 
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
-    - name: Setup variables
-      run: |
-        # Set the BASE_SHA and HEAD_SHA depending on event type (push or pull_request)
-        if [ "${{ github.event_name }}" == "pull_request" ]; then
-          echo "BASE_SHA=$(git merge-base refs/remotes/origin/${{ github.base_ref }} ${{ github.event.pull_request.head.sha }})" >> $GITHUB_ENV
-          echo "HEAD_SHA=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
-        elif [ "${{ github.event_name }}" == "push" ]; then
-          echo "BASE_SHA=${{ github.event.before }}" >> $GITHUB_ENV
-          echo "HEAD_SHA=${{ github.event.after }}" >> $GITHUB_ENV
-        fi
+      - name: Setup Build Environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libncurses5-dev gawk git ccache gettext zlib1g-dev libssl-dev xsltproc file unzip wget python3
 
-    - name: Detect Changed Directories
-      id: detect-changes
-      run: |
-        # Detect which directories have changed
-        CHANGED_DIRS=$(git diff --name-only $BASE_SHA $HEAD_SHA | awk -F'/' '{print $1}' | sort -u | tr '\n' ',')
-        echo "CHANGED_DIRS=$CHANGED_DIRS" >> $GITHUB_ENV
+      - name: Download and extract SDK for ${{ matrix.platform }}
+        run: |
+          case "${{ matrix.platform }}" in
+            x86_64)
+              url="https://downloads.openwrt.org/releases/23.05.0/targets/x86/64/openwrt-sdk-23.05.0-x86-64_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
+              ;;
+            aarch64_generic)
+              url="https://downloads.openwrt.org/releases/23.05.0/targets/rockchip/armv8/openwrt-sdk-23.05.0-rockchip-armv8_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
+              ;;
+            aarch64_cortex-a53)
+              url="https://downloads.openwrt.org/releases/23.05.0/targets/mvebu/cortexa53/openwrt-sdk-23.05.0-mvebu-cortexa53_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
+              ;;
+            aarch64_cortex-a72)
+              url="https://downloads.openwrt.org/releases/23.05.0/targets/mvebu/cortexa72/openwrt-sdk-23.05.0-mvebu-cortexa72_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
+              ;;
+            arm_cortex-a7)
+              url="https://downloads.openwrt.org/releases/23.05.0/targets/mediatek/mt7629/openwrt-sdk-23.05.0-mediatek-mt7629_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz"
+              ;;
+            arm_cortex-a7_neon-vfpv4)
+              url="https://downloads.openwrt.org/releases/23.05.0/targets/sunxi/cortexa7/openwrt-sdk-23.05.0-sunxi-cortexa7_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz"
+              ;;
+            arm_cortex-a8_vfpv3)
+              url="https://downloads.openwrt.org/releases/23.05.0/targets/sunxi/cortexa8/openwrt-sdk-23.05.0-sunxi-cortexa8_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz"
+              ;;
+            arm_cortex-a9)
+              url="https://downloads.openwrt.org/releases/23.05.0/targets/bcm53xx/generic/openwrt-sdk-23.05.0-bcm53xx-generic_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz"
+              ;;
+            arm_cortex-a9_neon)
+              url="https://downloads.openwrt.org/releases/23.05.0/targets/zynq/generic/openwrt-sdk-23.05.0-zynq-generic_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz"
+              ;;
+            arm_cortex-a9_vfpv3-d16)
+              url="https://downloads.openwrt.org/releases/23.05.0/targets/mvebu/cortexa9/openwrt-sdk-23.05.0-mvebu-cortexa9_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz"
+              ;;
+            arm_cortex-a15_neon-vfpv4)
+              url="https://downloads.openwrt.org/releases/23.05.0/targets/ipq806x/generic/openwrt-sdk-23.05.0-ipq806x-generic_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz"
+              ;;
+            mips_24kc)
+              url="https://downloads.openwrt.org/releases/23.05.0/targets/ath79/generic/openwrt-sdk-23.05.0-ath79-generic_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
+              ;;
+            mips_4kec)
+              url="https://downloads.openwrt.org/releases/23.05.0/targets/realtek/rtl838x/openwrt-sdk-23.05.0-realtek-rtl838x_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
+              ;;
+            mips_mips32)
+              url="https://downloads.openwrt.org/releases/23.05.0/targets/bcm63xx/generic/openwrt-sdk-23.05.0-bcm63xx-generic_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
+              ;;
+            mipsel_24kc)
+              url="https://downloads.openwrt.org/releases/23.05.0/targets/ramips/rt288x/openwrt-sdk-23.05.0-ramips-rt288x_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
+              ;;
+            mipsel_74kc)
+              url="https://downloads.openwrt.org/releases/23.05.0/targets/ramips/rt3883/openwrt-sdk-23.05.0-ramips-rt3883_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
+              ;;
+            mipsel_mips32)
+              url="https://downloads.openwrt.org/releases/23.05.0/targets/bcm47xx/generic/openwrt-sdk-23.05.0-bcm47xx-generic_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
+              ;;
+            *)
+              echo "Unknown platform: ${{ matrix.platform }}"
+              exit 1
+              ;;
+          esac
 
-    - name: Initialization ${{ matrix.platform }} compile environment
-      run: |
-        # Initialize the environment and install necessary packages
-        sudo -E apt-get update
-        sudo -E apt-get install -y build-essential clang flex bison g++ gawk gcc-multilib g++-multilib gettext git libncurses-dev libssl-dev python3-distutils python3-setuptools rsync swig unzip zlib1g-dev wget
+          wget -q $url -O openwrt-sdk.tar.xz
+          tar -xf openwrt-sdk.tar.xz
+          mv openwrt-sdk-* sdk
 
-    - name: ${{ matrix.platform }} sdk download
-      run: |
-        wget ${{ matrix.url_sdk }}
-        file_name=$(basename ${{ matrix.url_sdk }})
-        mkdir sdk && tar -xJf $file_name -C ./sdk --strip-components=1
-        cd sdk
-
-    - name: SSH connection to Actions
-      uses: mxschmitt/action-tmate@v3
-      if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh != 'false') || contains(github.event.action, 'ssh')
-
-    - name: ${{ matrix.platform }} feeds configuration packages
-      run: |
-        cd sdk
-        echo "src-git passwall_packages https://github.com/${{ env.packages }}.git;main" > feeds.conf
-        ./scripts/feeds update -a
-        ./scripts/feeds install -a -f -p passwall_packages
-        make defconfig
-
-    - name: Compile Changed Packages
-      id: compile
-      run: |
-        cd sdk
-        force_build="${{ github.event.inputs.force_build }}"
-        if [ "$force_build" == "true" ]; then
-          echo "Force build is enabled."
-        elif [ -z "$CHANGED_DIRS" ]; then
-          echo "No changes detected"
-          exit 0
-        fi
-        IFS=',' read -ra DIRS <<< "$CHANGED_DIRS"
-        for DIR in "${DIRS[@]}"; do
-          if [ -d "package/feeds/passwall_packages/$DIR" ]; then
-            make package/feeds/passwall_packages/$DIR/compile -j$(nproc) V=s || exit 1
-          else
-            echo "Directory $DIR does not exist"
+          if [ ! -d "sdk" ]; then
+            echo "SDK extraction failed or sdk directory not found."
             exit 1
           fi
-        done
 
-    - name: Prepare SFTP upload script
-      run: |
-        echo 'cd sdk' > upload.sh
-        echo 'sshpass -p "${{ secrets.SFTP_PASSWORD }}" ssh ${{ secrets.SFTP_USER }}@static.115.193.75.5.clients.your-server.de "mkdir -p /var/www/${{ matrix.platform }}/targets /var/www/${{ matrix.platform }}/packages"' >> upload.sh
-        echo 'find sdk/bin/targets -type f \( -name "*.ipk" -o -name "Packages" -o -name "Packages.gz" -o -name "Packages.sig" -o -name "Packages.manifest" \) | while read -r file; do' >> upload.sh
-        echo '  echo "Uploading $file"' >> upload.sh
-        echo '  sshpass -p "${{ secrets.SFTP_PASSWORD }}" sftp -o StrictHostKeyChecking=no ${{ secrets.SFTP_USER }}@static.115.193.75.5.clients.your-server.de <<EOF' >> upload.sh
-        echo '    put $file /var/www/${{ matrix.platform }}/targets/' >> upload.sh
-        echo '    bye' >> upload.sh
-        echo 'EOF' >> upload.sh
-        echo 'done' >> upload.sh
+      - name: ${{ matrix.platform }} feeds configuration packages
+        run: |
+          cd sdk
+          echo "src-git passwall_packages https://github.com/peditx/openwrt-passwall-packages.git;main" >> feeds.conf
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a || { echo "Feed update/install failed"; exit 1; }
+          ./scripts/feeds install -a -f -p passwall_packages || { echo "Passwall packages install failed"; exit 1; }
+          make defconfig
 
-        echo 'find sdk/bin/packages -type f \( -name "*.ipk" -o -name "Packages" -o -name "Packages.gz" -o -name "Packages.sig" -o -name "Packages.manifest" \) | while read -r file; do' >> upload.sh
-        echo '  echo "Uploading $file"' >> upload.sh
-        echo '  sshpass -p "${{ secrets.SFTP_PASSWORD }}" sftp -o StrictHostKeyChecking=no ${{ secrets.SFTP_USER }}@static.115.193.75.5.clients.your-server.de <<EOF' >> upload.sh
-        echo '    put $file /var/www/${{ matrix.platform }}/packages/' >> upload.sh
-        echo '    bye' >> upload.sh
-        echo 'EOF' >> upload.sh
-        echo 'done' >> upload.sh
+      - name: Compile Changed Packages
+        id: compile
+        run: |
+          cd sdk
+          force_build="${{ github.event.inputs.force_build }}"
+          if [ "$force_build" == "true" ]; then
+            echo "Force build is enabled."
+          elif [ -z "$CHANGED_DIRS" ]; then
+            echo "No changes detected"
+            exit 0
+          fi
+          IFS=',' read -ra DIRS <<< "$CHANGED_DIRS"
+           for DIR in "${DIRS[@]}"; do
+            if [ -d "package/feeds/passwall_packages/$DIR" ]; then
+              make package/feeds/passwall_packages/$DIR/compile -j$(nproc) V=s || exit 1
+            else
+              echo "Directory $DIR does not exist"
+              exit 1
+            fi
+          done
 
-        chmod +x upload.sh
+      - name: Build Packages for ${{ matrix.platform }}
+        run: |
+          cd sdk
+          make package/feeds/passwall_packages/compile V=s || { echo "Build failed"; exit 1; }
 
-    - name: Upload Packages to SFTP
-      run: |
-        ./upload.sh
+      - name: Debug Information
+        run: |
+          echo "Listing sdk/bin directory structure:"
+          ls -R sdk/bin
+
+      - name: Package Output
+        run: |
+          mkdir -p output/${{ matrix.platform }}
+          cp -r sdk/bin/* output/${{ matrix.platform }}/
+
+      - name: Upload to SFTP server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SFTP_HOST }}
+          username: ${{ secrets.SFTP_USER }}
+          password: ${{ secrets.SFTP_PASSWORD }}
+          port: 22
+          source: "output/${{ matrix.platform }}/*"
+          target: "/var/www/html/passwall-packages/${{ matrix.platform }}/"
