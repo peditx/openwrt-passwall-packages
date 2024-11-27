@@ -14,6 +14,7 @@ jobs:
         platform:
           - x86_64
           - aarch64_generic
+          - aarch64_cortex-a53
 
     steps:
       # 1. دریافت ریپازیتوری
@@ -36,7 +37,11 @@ jobs:
             aarch64_generic)
               url="https://downloads.openwrt.org/releases/23.05.0/targets/rockchip/armv8/openwrt-sdk-23.05.0-rockchip-armv8_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
               ;;
-
+            aarch64_cortex-a53)
+              url="https://downloads.openwrt.org/releases/23.05.0/targets/rockchip/armv8/openwrt-sdk-23.05.0-rockchip-armv8_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
+              ;;
+            # سایر معماری‌ها را اضافه کنید
+            *)
               echo "Unknown platform: ${{ matrix.platform }}"
               exit 1
               ;;
