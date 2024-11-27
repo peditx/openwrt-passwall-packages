@@ -1,4 +1,4 @@
-name: Build and Upload OpenWrt Packages
+name: Build OpenWrt SDKs and Packages
 
 on:
   push:
@@ -6,8 +6,29 @@ on:
       - main
 
 jobs:
-  build-and-upload:
+  build:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        platform: 
+          - x86_64
+          - aarch64_generic
+          - aarch64_cortex-a53
+          - aarch64_cortex-a72
+          - arm_cortex-a7
+          - arm_cortex-a7_neon-vfpv4
+          - arm_cortex-a8_vfpv3
+          - arm_cortex-a9
+          - arm_cortex-a9_neon
+          - arm_cortex-a9_vfpv3-d16
+          - arm_cortex-a15_neon-vfpv4
+          - mips_24kc
+          - mips_4kec
+          - mips_mips32
+          - mipsel_24kc
+          - mipsel_74kc
+          - mipsel_mips32
 
     steps:
       # 1. دریافت ریپازیتوری
@@ -59,10 +80,10 @@ jobs:
 
       # 6. آپلود به سرور SFTP
       - name: Upload to SFTP Server
-        uses: appleboy/scp-action@v0.1.5
+        uses: garygrossgarten/github-action-scp@v1.1.2
         with:
+          local: output
+          remote: /var/www/html/passwall-packages/
           host: static.115.193.75.5.clients.your-server.de
           username: ${{ secrets.SFTP_USER }}
           password: ${{ secrets.SFTP_PASS }}
-          source: output/
-          target: /var/www/html/passwall-packages/
