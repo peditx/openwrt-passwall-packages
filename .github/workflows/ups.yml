@@ -51,16 +51,12 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Setup Build Environment
+      - name: Update apt and install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential libncurses5-dev gawk git ccache gettext zlib1g-dev libssl-dev xsltproc file unzip wget python3
+          sudo apt update
+          sudo apt install -y autoconf automake libtool pkg-config git make libmaxminddb0 libmaxminddb-dev mmdb-bin
 
-      - name: Install Dependencies for libmaxminddb
-        run: |
-          sudo apt-get install -y autoconf automake libtool pkg-config
-
-      - name: Install libmaxminddb
+      - name: Install libmaxminddb from source
         run: |
           git clone https://github.com/maxmind/libmaxminddb.git
           cd libmaxminddb
@@ -68,7 +64,7 @@ jobs:
           ./configure
           make
           sudo make install
-          sudo sh -c "echo /usr/local/lib  >> /etc/ld.so.conf.d/local.conf"
+          sudo sh -c "echo /usr/local/lib >> /etc/ld.so.conf.d/local.conf"
           sudo ldconfig
           cd ..
 
@@ -145,7 +141,7 @@ jobs:
         run: |
           cd sdk
           echo "src-git base https://github.com/openwrt/openwrt.git;openwrt-23.05" > feeds.conf
-           echo "src-git packages https://github.com/openwrt/packages.git;openwrt-23.05" >> feeds.conf
+          echo "src-git packages https://github.com/openwrt/packages.git;openwrt-23.05" >> feeds.conf
           echo "src-git luci https://github.com/openwrt/luci.git;openwrt-23.05" >> feeds.conf
           echo "src-git routing https://git.openwrt.org/feed/routing.git;openwrt-23.05" >> feeds.conf
           echo "src-git passwall_packages https://github.com/peditx/openwrt-passwall-packages.git;main" >> feeds.conf
