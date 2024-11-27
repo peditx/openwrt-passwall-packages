@@ -1,4 +1,4 @@
-name: Build OpenWrt SDKs and Packages
+name: Build OpenWrt SDK for Multiple Architectures
 
 on:
   push:
@@ -11,7 +11,7 @@ jobs:
 
     strategy:
       matrix:
-        platform: 
+        platform:
           - x86_64
           - aarch64_generic
           - aarch64_cortex-a53
@@ -41,49 +41,41 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential libncurses5-dev gawk git ccache gettext zlib1g-dev libssl-dev xsltproc file unzip wget python3
 
-      # 3. دانلود و نصب SDK برای معماری‌های مختلف
-      - name: Download and Setup OpenWrt SDK
+      # 3. دانلود SDK مناسب برای معماری
+      - name: Download and Setup OpenWrt SDK for ${{ matrix.platform }}
         run: |
-          architectures="aarch64_cortex-a53 aarch64_cortex-a72 aarch64_generic arm_arm1176jzf-s arm_cortex-a7_neon-vfpv4 arm_cortex-a9 arm_cortex-a15_neon-vfpv4 arm_cortex-a53_neon-vfpv4 arm_cortex-a72_neon-vfpv4 arm_xscale i386_generic mips_24kc mips_mips32 mipsel_24kc mipsel_mips32 powerpc_464fp powerpc_8540 x86_64"
-          mkdir -p sdk
-          for arch in $architectures; do
-            wget -q "https://downloads.openwrt.org/releases/23.05.0/targets/${arch}/sdk.tar.xz" -O "sdk/$arch-sdk.tar.xz"
-            mkdir -p "sdk/$arch"
-            tar -xf "sdk/$arch-sdk.tar.xz" -C "sdk/$arch" --strip-components=1
-          done
+          SDK_URL="https://downloads.openwrt.org/releases/23.05.0/targets/${{ matrix.platform }}/sdk.tar.xz"
+          mkdir -p sdk/${{ matrix.platform }}
+          wget -q $SDK_URL -O sdk/${{ matrix.platform }}.tar.xz
+          tar -xf sdk/${{ matrix.platform }}.tar.xz -C sdk/${{ matrix.platform }} --strip-components=1
 
-      # 4. کامپایل فایل‌های میک برای هر معماری
-      - name: Build Packages for All Architectures
+      # 4. کامپایل فایل‌های میک برای معماری
+      - name: Build Packages for ${{ matrix.platform }}
         run: |
-          architectures="aarch64_cortex-a53 aarch64_cortex-a72 aarch64_generic arm_arm1176jzf-s arm_cortex-a7_neon-vfpv4 arm_cortex-a9 arm_cortex-a15_neon-vfpv4 arm_cortex-a53_neon-vfpv4 arm_cortex-a72_neon-vfpv4 arm_xscale i386_generic mips_24kc mips_mips32 mipsel_24kc mipsel_mips32 powerpc_464fp powerpc_8540 x86_64"
-          for arch in $architectures; do
-            echo "Building for architecture: $arch"
-            pushd sdk/$arch
-            make package/feeds/packages/compile V=s
-            popd
-          done
+          echo "Building for architecture: ${{ matrix.platform }}"
+          pushd sdk/${{ matrix.platform }}
+          make package/feeds/packages/compile V=s
+          popd
 
       # 5. بسته‌بندی خروجی‌ها
-      - name: Create Metadata and Package Files
+      - name: Create Metadata and Package Files for ${{ matrix.platform }}
         run: |
-          architectures="aarch64_cortex-a53 aarch64_cortex-a72 aarch64_generic arm_arm1176jzf-s arm_cortex-a7_neon-vfpv4 arm_cortex-a9 arm_cortex-a15_neon-vfpv4 arm_cortex-a53_neon-vfpv4 arm_cortex-a72_neon-vfpv4 arm_xscale i386_generic mips_24kc mips_mips32 mipsel_24kc mipsel_mips32 powerpc_464fp powerpc_8540 x86_64"
-          for arch in $architectures; do
-            mkdir -p output/$arch
-            cp -r sdk/$arch/bin/packages/* output/$arch/
+          mkdir -p output/${{ matrix.platform }}
+          cp -r sdk/${{ matrix.platform }}/bin/packages/* output/${{ matrix.platform }}/
 
-            # ایجاد package.gz
-            tar --warning=no-file-changed -czf "output/$arch/package.gz" -C "output/$arch" .
+          # ایجاد package.gz
+          tar --warning=no-file-changed -czf "output/${{ matrix.platform }}/package.gz" -C "output/${{ matrix.platform }}" .
 
-            # ایجاد package.manifest
-            echo "Manifest for $arch packages" > "output/$arch/package.manifest"
-          done
+          # ایجاد package.manifest
+          echo "Manifest for ${{ matrix.platform }} packages" > "output/${{ matrix.platform }}/package.manifest"
 
       # 6. آپلود به سرور SFTP
       - name: Upload to SFTP Server
-        uses: garygrossgarten/github-action-scp@v1.1.2
+        uses: appleboy/ssh-action@v0.1.1
         with:
-          local: output
-          remote: /var/www/html/passwall-packages/
           host: static.115.193.75.5.clients.your-server.de
           username: ${{ secrets.SFTP_USER }}
           password: ${{ secrets.SFTP_PASS }}
+          port: 22
+          source: "output/${{ matrix.platform }}/*"
+          target: "/path/to/remote/directory"
