@@ -4,6 +4,23 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - '**.md'
+      - '.github/**'
+  pull_request:
+    paths-ignore:
+      - '**.md'
+      - '.github/**'
+  workflow_dispatch:
+    inputs:
+      force_build:
+        description: 'Force build and upload'
+        required: true
+        default: 'true'
+
+env:
+  TZ: Asia/Tehran
+  packages: ${{ github.repository }}
 
 jobs:
   build:
@@ -111,42 +128,50 @@ jobs:
       - name: ${{ matrix.platform }} feeds configuration packages
         run: |
           cd sdk
+          echo "src-git base https://github.com/openwrt/openwrt.git;openwrt-23.05" > feeds.conf
+          echo "src-git packages https://github.com/openwrt/packages.git;openwrt-23.05" >> feeds.conf
+          echo "src-git luci https://github.com/openwrt/luci.git;openwrt-23.05" >> feeds.conf
+          echo "src-git routing https://git.openwrt.org/feed/routing.git;openwrt-23.05" >> feeds.conf
           echo "src-git passwall_packages https://github.com/peditx/openwrt-passwall-packages.git;main" >> feeds.conf
-          ./scripts/feeds update -a
+             ./scripts/feeds update -a
           ./scripts/feeds install -a || { echo "Feed update/install failed"; exit 1; }
           ./scripts/feeds install -a -f -p passwall_packages || { echo "Passwall packages install failed"; exit 1; }
+          echo "CONFIG_ALL_NONSHARED=n" > .config
+          echo "CONFIG_ALL_KMODS=n" >> .config
+          echo "CONFIG_ALL=n" >> .config
+          echo "CONFIG_AUTOREMOVE=n" >> .config
+          echo "CONFIG_SIGNED_PACKAGES=n" >> .config
           make defconfig
 
-      - name: Compile Changed Packages
+      - name: Download Packages
+        run: |
+          cd sdk
+          make download -j8
+          find dl -size -1024c -exec ls -l {} \;
+
+      - name: Compile Packages
         id: compile
         run: |
           cd sdk
           force_build="${{ github.event.inputs.force_build }}"
           if [ "$force_build" == "true" ]; then
             echo "Force build is enabled."
+            make -j$(nproc) V=s $(for package in brook chinadns-ng dns2socks dns2tcp gn hysteria ipt2socks microsocks naiveproxy pdnsd-alt shadowsocksr-libev shadowsocks-rust simple-obfs sing-box ssocks tcping trojan trojan-go trojan-plus tuic-client v2ray-core v2ray-geodata v2ray-plugin xray-core xray-plugin; do echo "package/feeds/passwall_packages/$package/compile"; done)
           elif [ -z "$CHANGED_DIRS" ]; then
             echo "No changes detected"
             exit 0
+          else
+            IFS=',' read -ra DIRS <<< "$CHANGED_DIRS"
+            for DIR in "${DIRS[@]}"; do
+              if [ -d "package/feeds/passwall_packages/$DIR" ]; then
+                cd sdk
+                make package/feeds/passwall_packages/$DIR/compile -j$(nproc) V=s || exit 1
+              else
+                echo "Directory $DIR does not exist"
+                exit 1
+              fi
+            done
           fi
-          IFS=',' read -ra DIRS <<< "$CHANGED_DIRS"
-          for DIR in "${DIRS[@]}"; do
-            if [ -d "package/feeds/passwall_packages/$DIR" ]; then
-              make package/feeds/passwall_packages/$DIR/compile -j$(nproc) V=s || exit 1
-            else
-              echo "Directory $DIR does not exist"
-              exit 1
-            fi
-          done
-
-      - name: Build Packages for ${{ matrix.platform }}
-        run: |
-          cd sdk
-          make package/feeds/passwall_packages/compile V=s || { echo "Build failed"; exit 1; }
-
-      - name: Debug Information
-        run: |
-          echo "Listing sdk/bin directory structure:"
-          ls -R sdk/bin
 
       - name: Package Output
         run: |
