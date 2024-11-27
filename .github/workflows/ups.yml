@@ -56,6 +56,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential libncurses5-dev gawk git ccache gettext zlib1g-dev libssl-dev xsltproc file unzip wget python3
 
+      - name: Install Dependencies for libmaxminddb
+        run: |
+          sudo apt-get install -y autoconf automake libtool pkg-config
+
       - name: Install libmaxminddb
         run: |
           git clone https://github.com/maxmind/libmaxminddb.git
@@ -141,7 +145,7 @@ jobs:
         run: |
           cd sdk
           echo "src-git base https://github.com/openwrt/openwrt.git;openwrt-23.05" > feeds.conf
-          echo "src-git packages https://github.com/openwrt/packages.git;openwrt-23.05" >> feeds.conf
+           echo "src-git packages https://github.com/openwrt/packages.git;openwrt-23.05" >> feeds.conf
           echo "src-git luci https://github.com/openwrt/luci.git;openwrt-23.05" >> feeds.conf
           echo "src-git routing https://git.openwrt.org/feed/routing.git;openwrt-23.05" >> feeds.conf
           echo "src-git passwall_packages https://github.com/peditx/openwrt-passwall-packages.git;main" >> feeds.conf
