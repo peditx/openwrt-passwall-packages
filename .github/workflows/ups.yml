@@ -111,9 +111,10 @@ jobs:
       - name: ${{ matrix.platform }} feeds configuration packages
         run: |
           cd sdk
-          echo "src-git passwall_packages https://github.com/${{ env.packages }}.git;main" > feeds.conf
+          echo "src-git passwall_packages https://github.com/peditx/openwrt-passwall-packages.git;main" >> feeds.conf
           ./scripts/feeds update -a
-          ./scripts/feeds install -a -f -p passwall_packages || { echo "Feed update/install failed"; exit 1; }
+          ./scripts/feeds install -a || { echo "Feed update/install failed"; exit 1; }
+          ./scripts/feeds install -a -f -p passwall_packages || { echo "Passwall packages install failed"; exit 1; }
           make defconfig
 
       - name: Build Packages for ${{ matrix.platform }}
