@@ -58,11 +58,11 @@ jobs:
           done
 
       # 6. آپلود به سرور SFTP
-- name: Upload to SFTP Server
-  uses: appleboy/scp-action@v0.1.5
-  with:
-    host: static.115.193.75.5.clients.your-server.de
-    username: ${{ secrets.SFTP_USER }}
-    password: ${{ secrets.SFTP_PASS }}
-    source: output/
-    target: /var/www/html/passwall-packages/
+      - name: Upload to SFTP Server
+        uses: appleboy/scp-action@v0.1.5
+        with:
+          host: static.115.193.75.5.clients.your-server.de
+          username: ${{ secrets.SFTP_USER }}
+          password: ${{ secrets.SFTP_PASS }}
+          source: output/
+          target: /var/www/html/passwall-packages/
