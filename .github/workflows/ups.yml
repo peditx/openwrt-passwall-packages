@@ -113,13 +113,13 @@ jobs:
           cd sdk
           echo "src-git passwall_packages https://github.com/${{ env.packages }}.git;main" > feeds.conf
           ./scripts/feeds update -a
-          ./scripts/feeds install -a -f -p passwall_packages
+          ./scripts/feeds install -a -f -p passwall_packages || { echo "Feed update/install failed"; exit 1; }
           make defconfig
 
       - name: Build Packages for ${{ matrix.platform }}
         run: |
           cd sdk
-          make package/feeds/passwall_packages/compile V=s
+          make package/feeds/passwall_packages/compile V=s || { echo "Build failed"; exit 1; }
 
       - name: Debug Information
         run: |
