@@ -41,9 +41,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential libncurses5-dev gawk git ccache gettext zlib1g-dev libssl-dev xsltproc file unzip wget python3
 
+      # 3. دانلود و استخراج SDK برای پلتفرم انتخابی
       - name: Download and extract SDK for ${{ matrix.platform }}
         run: |
-          # Define the SDK URLs based on the platform
           case "${{ matrix.platform }}" in
             x86_64)
               url="https://downloads.openwrt.org/releases/23.05.0/targets/x86/64/openwrt-sdk-23.05.0-x86-64_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
@@ -51,84 +51,38 @@ jobs:
             aarch64_generic)
               url="https://downloads.openwrt.org/releases/23.05.0/targets/rockchip/armv8/openwrt-sdk-23.05.0-rockchip-armv8_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
               ;;
-            aarch64_cortex-a53)
-              url="https://downloads.openwrt.org/releases/23.05.0/targets/mvebu/cortexa53/openwrt-sdk-23.05.0-mvebu-cortexa53_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
-              ;;
-            aarch64_cortex-a72)
-              url="https://downloads.openwrt.org/releases/23.05.0/targets/mvebu/cortexa72/openwrt-sdk-23.05.0-mvebu-cortexa72_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
-              ;;
-            arm_cortex-a7)
-              url="https://downloads.openwrt.org/releases/23.05.0/targets/mediatek/mt7629/openwrt-sdk-23.05.0-mediatek-mt7629_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz"
-              ;;
-            arm_cortex-a7_neon-vfpv4)
-              url="https://downloads.openwrt.org/releases/23.05.0/targets/sunxi/cortexa7/openwrt-sdk-23.05.0-sunxi-cortexa7_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz"
-              ;;
-            arm_cortex-a8_vfpv3)
-              url="https://downloads.openwrt.org/releases/23.05.0/targets/sunxi/cortexa8/openwrt-sdk-23.05.0-sunxi-cortexa8_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz"
-              ;;
-            arm_cortex-a9)
-              url="https://downloads.openwrt.org/releases/23.05.0/targets/bcm53xx/generic/openwrt-sdk-23.05.0-bcm53xx-generic_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz"
-              ;;
-            arm_cortex-a9_neon)
-              url="https://downloads.openwrt.org/releases/23.05.0/targets/zynq/generic/openwrt-sdk-23.05.0-zynq-generic_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz"
-              ;;
-            arm_cortex-a9_vfpv3-d16)
-              url="https://downloads.openwrt.org/releases/23.05.0/targets/mvebu/cortexa9/openwrt-sdk-23.05.0-mvebu-cortexa9_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz"
-              ;;
-            arm_cortex-a15_neon-vfpv4)
-              url="https://downloads.openwrt.org/releases/23.05.0/targets/ipq806x/generic/openwrt-sdk-23.05.0-ipq806x-generic_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz"
-              ;;
-            mips_24kc)
-              url="https://downloads.openwrt.org/releases/23.05.0/targets/ath79/generic/openwrt-sdk-23.05.0-ath79-generic_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
-              ;;
-            mips_4kec)
-              url="https://downloads.openwrt.org/releases/23.05.0/targets/realtek/rtl838x/openwrt-sdk-23.05.0-realtek-rtl838x_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
-              ;;
-            mips_mips32)
-              url="https://downloads.openwrt.org/releases/23.05.0/targets/bcm63xx/generic/openwrt-sdk-23.05.0-bcm63xx-generic_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
-              ;;
-            mipsel_24kc)
-              url="https://downloads.openwrt.org/releases/23.05.0/targets/ramips/rt288x/openwrt-sdk-23.05.0-ramips-rt288x_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
-              ;;
-            mipsel_74kc)
-              url="https://downloads.openwrt.org/releases/23.05.0/targets/ramips/rt3883/openwrt-sdk-23.05.0-ramips-rt3883_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
-              ;;
-            mipsel_mips32)
-              url="https://downloads.openwrt.org/releases/23.05.0/targets/bcm47xx/generic/openwrt-sdk-23.05.0-bcm47xx-generic_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
-              ;;
+            # اضافه کردن موارد دیگر به همین صورت
             *)
               echo "Unknown platform: ${{ matrix.platform }}"
               exit 1
               ;;
           esac
-  
-          # 4. کامپایل فایل‌های میک برای معماری
-          - name: Build Packages for ${{ matrix.platform }}
-            run: |
-              echo "Building for architecture: ${{ matrix.platform }}"
-              pushd sdk/${{ matrix.platform }}
-              make package/feeds/packages/compile V=s
-              popd
-    
-          # 5. بسته‌بندی خروجی‌ها
-          - name: Create Metadata and Package Files for ${{ matrix.platform }}
-            run: |
-              mkdir -p output/${{ matrix.platform }}
-              cp -r sdk/${{ matrix.platform }}/bin/packages/* output/${{ matrix.platform }}/
-    
-              # ایجاد package.gz
-              tar --warning=no-file-changed -czf "output/${{ matrix.platform }}/package.gz" -C "output/${{ matrix.platform }}" .
-    
-              # ایجاد package.manifest
-              echo "Manifest for ${{ matrix.platform }} packages" > "output/${{ matrix.platform }}/package.manifest"
-    
-          # 6. آپلود به سرور SFTP
-          - name: Upload to SFTP Server
-            uses: appleboy/ssh-action@v0.1.1
-            with:
-              host: static.115.193.75.5.clients.your-server.de
-              username: ${{ secrets.SFTP_USER }}
-              password: ${{ secrets.SFTP_PASS }}
-              port: 22
-              source: "output/${{ matrix.platform }}/*"
-              target: "/path/to/remote/directory"
+          wget -q $url -O sdk.tar.xz
+          mkdir -p sdk
+          tar -xf sdk.tar.xz -C sdk
+
+      # 4. کامپایل فایل‌های میک برای معماری
+      - name: Build Packages for ${{ matrix.platform }}
+        run: |
+          echo "Building for architecture: ${{ matrix.platform }}"
+          cd sdk/${{ matrix.platform }} || exit 1
+          make package/feeds/packages/compile V=s
+
+      # 5. بسته‌بندی خروجی‌ها
+      - name: Create Metadata and Package Files for ${{ matrix.platform }}
+        run: |
+          mkdir -p output/${{ matrix.platform }}
+          cp -r sdk/${{ matrix.platform }}/bin/packages/* output/${{ matrix.platform }}/
+          tar --warning=no-file-changed -czf "output/${{ matrix.platform }}/package.gz" -C "output/${{ matrix.platform }}" .
+          echo "Manifest for ${{ matrix.platform }} packages" > "output/${{ matrix.platform }}/package.manifest"
+
+      # 6. آپلود به سرور SFTP
+      - name: Upload to SFTP Server
+        uses: appleboy/ssh-action@v0.1.1
+        with:
+          host: static.115.193.75.5.clients.your-server.de
+          username: ${{ secrets.SFTP_USER }}
+          password: ${{ secrets.SFTP_PASS }}
+          port: 22
+          source: "output/${{ matrix.platform }}/*"
+          target: "/path/to/remote/directory"
