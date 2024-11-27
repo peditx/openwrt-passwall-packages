@@ -139,13 +139,13 @@ jobs:
           mkdir -p output/${{ matrix.platform }}
           cp -r sdk/${{ matrix.platform }}/bin/* output/${{ matrix.platform }}/
           
-      # 7. آپلود فایل‌ها به سرور SFTP
       - name: Upload to SFTP server
-        uses: appleboy/sftp-action@v0.1.3
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SFTP_HOST }}
           username: ${{ secrets.SFTP_USER }}
           password: ${{ secrets.SFTP_PASSWORD }}
           port: 22
           source: "output/${{ matrix.platform }}/*"
-          target: "/var/www/html/passwall-packages/"
+          target: "/var/www/html/passwall-packages/${{ matrix.platform }}/"
+
