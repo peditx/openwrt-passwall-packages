@@ -35,18 +35,13 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # 2. کلون کردن ریپازیتوری OpenWrt Passwall Packages
-      - name: Clone OpenWrt Passwall Packages Repository
-        run: |
-          git clone https://github.com/peditx/openwrt-passwall-packages.git
-          cd openwrt-passwall-packages
-          
-      # 3. نصب ابزارهای مورد نیاز برای کامپایل
+      # 2. نصب ابزارهای مورد نیاز برای کامپایل
       - name: Setup Build Environment
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential libncurses5-dev gawk git ccache gettext zlib1g-dev libssl-dev xsltproc file unzip wget python3
 
+      # 3. دریافت SDK برای معماری هدف
       - name: Download and extract SDK for ${{ matrix.platform }}
         run: |
           # Define the SDK URLs based on the platform
@@ -108,34 +103,41 @@ jobs:
               ;;
           esac
 
-          wget $url -O sdk.tar.xz
-          tar -xJf sdk.tar.xz
+          # Extract the SDK for the platform
+          wget -q $url -O openwrt-sdk.tar.xz
+          tar -xf openwrt-sdk.tar.xz
 
-      # 5. ساخت بسته‌ها از ریپازیتوری OpenWrt Passwall Packages
-      - name: Build Passwall Packages for ${{ matrix.platform }}
+      # 4. تنظیم Feed‌ها
+      - name: ${{ matrix.platform }} feeds configuration packages
         run: |
-          cd openwrt-passwall-packages
+          cd sdk
+          echo "src-git passwall_packages https://github.com/${{ env.packages }}.git;main" > feeds.conf
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a -f -p passwall_packages
+          make defconfig
+
+      # 5. کامپایل فایل‌های میک برای معماری
+      - name: Build Packages for ${{ matrix.platform }}
+        run: |
+          echo "Building for architecture: ${{ matrix.platform }}"
+          pushd sdk/${{ matrix.platform }}
           make package/feeds/packages/compile V=s
+          popd
 
       # 6. بسته‌بندی خروجی‌ها
       - name: Create Metadata and Package Files for ${{ matrix.platform }}
         run: |
           mkdir -p output/${{ matrix.platform }}
           cp -r sdk/${{ matrix.platform }}/bin/packages/* output/${{ matrix.platform }}/
-    
+  
           # ایجاد package.gz
           tar --warning=no-file-changed -czf "output/${{ matrix.platform }}/package.gz" -C "output/${{ matrix.platform }}" .
-    
+  
           # ایجاد package.manifest
           echo "Manifest for ${{ matrix.platform }} packages" > "output/${{ matrix.platform }}/package.manifest"
-    
+
       # 7. آپلود به سرور SFTP
       - name: Upload to SFTP Server
         uses: appleboy/ssh-action@v0.1.1
         with:
-          host: static.115.193.75.5.clients.your-server.de
-          username: ${{ secrets.SFTP_USER }}
-          password: ${{ secrets.SFTP_PASS }}
-          port: 22
-          source: "output/${{ matrix.platform }}/*"
-          target: "/var/www/html/passwall-packages/"
+          host: static
