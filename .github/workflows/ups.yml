@@ -117,6 +117,27 @@ jobs:
           ./scripts/feeds install -a -f -p passwall_packages || { echo "Passwall packages install failed"; exit 1; }
           make defconfig
 
+      - name: Compile Changed Packages
+        id: compile
+        run: |
+          cd sdk
+          force_build="${{ github.event.inputs.force_build }}"
+          if [ "$force_build" == "true" ]; then
+            echo "Force build is enabled."
+          elif [ -z "$CHANGED_DIRS" ]; then
+            echo "No changes detected"
+            exit 0
+          fi
+          IFS=',' read -ra DIRS <<< "$CHANGED_DIRS"
+          for DIR in "${DIRS[@]}"; do
+            if [ -d "package/feeds/passwall_packages/$DIR" ]; then
+              make package/feeds/passwall_packages/$DIR/compile -j$(nproc) V=s || exit 1
+            else
+              echo "Directory $DIR does not exist"
+              exit 1
+            fi
+          done
+
       - name: Build Packages for ${{ matrix.platform }}
         run: |
           cd sdk
